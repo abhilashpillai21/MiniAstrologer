@@ -1,6 +1,5 @@
 from openai import OpenAI
 from dotenv import load_dotenv
-import utils
 import os
 import math
 import streamlit as st
@@ -27,8 +26,8 @@ def chunk_text_with_overlap(text, size=500, overlap=100):
     return chunk_text
 
 #chunk the input text and embed vectors
-def embedfiletext():
-    text = utils.getuploadedfiletext()
+def embedfiletext(text):
+    #text = fd.getuploadedfiletext()
     if not text:
         return []
     chunk_text=chunk_text_with_overlap(text)
@@ -53,12 +52,16 @@ def embed_question(question):
     return question_embedding
 
 #find the cosine similarity and return results
-def findanswers():
+def findanswers(file_text, question):
     if "embeddings" not in st.session_state:
         st.session_state.embeddings = embedfiletext()
     
     chunked_text_vectors = st.session_state.embeddings
-    question = utils.getquestion()
+
+    if not chunked_text_vectors:
+        return "Please upload a file"
+
+    #question = fd.getquestion()
     question_embedding = embed_question(question)
     scores = []
 
