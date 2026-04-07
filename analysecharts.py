@@ -7,7 +7,6 @@ import streamlit as st
 load_dotenv()
 embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL")
 llm_model=os.getenv("OPENAI_MODEL")
-question = ""
 
 client = OpenAI()
 
@@ -22,7 +21,7 @@ def cosine_similarity(vec1, vec2):
 def chunk_text_with_overlap(text, size=500, overlap=100):
     chunk_text=[]
     for i in range(0, len(text), size-overlap):
-        chunk_text.append([text[i:i+size]])
+        chunk_text.append(text[i:i+size])
     return chunk_text
 
 #chunk the input text and embed vectors
@@ -53,8 +52,8 @@ def embed_question(question):
 
 #find the cosine similarity and return results
 def findanswers(file_text, question):
-    if "embeddings" not in st.session_state:
-        st.session_state.embeddings = embedfiletext()
+    if "embeddings" not in st.session_state or st.session_state.embeddings is None:
+        st.session_state.embeddings = embedfiletext(file_text)
     
     chunked_text_vectors = st.session_state.embeddings
 
@@ -72,7 +71,7 @@ def findanswers(file_text, question):
 
     scores.sort(key = lambda x:x[0], reverse=True)
 
-    context = "\n\n".join(x[1] for x in scores[:3])
+    context = "\n\n".join(x[1] for x in scores[:10])
 
     response = client.responses.create(
         model = llm_model,
@@ -84,5 +83,5 @@ def findanswers(file_text, question):
                  Question:
                 {question}"""
     )
-
+    print(context)
     return response.output_text
