@@ -76,7 +76,7 @@ def findanswers(file_text, question):
     response = client.responses.create(
         model = llm_model,
         input = f""" Answer the question using only the context below.
-                If the answer is not found, say "Not found in document".
+                Use strong reasoning to complete the answers and use astrological reasoning to answer the questions but answers must be grounded in context.
                 Context:
                 {context}
     
@@ -84,4 +84,4 @@ def findanswers(file_text, question):
                 {question}"""
     )
     print(context)
-    return response.output_text
+    return response.output_text, scores[:10]

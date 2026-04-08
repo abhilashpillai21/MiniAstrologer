@@ -37,8 +37,14 @@ if prompt:= st.chat_input("Ask your question"):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         file_text = getuploadfile()
-        full_response = analysecharts.findanswers(file_text, prompt)
+        full_response, sources = analysecharts.findanswers(file_text, prompt)
         st.session_state.messages.append({"role":"assistant", "content":full_response})
         message_placeholder.markdown(full_response)    
+
+        with st.sidebar:    
+            with st.expander("Sources used"):
+                for score, text in sources: 
+                    st.markdown(f"**Score : ** {score:4f}")
+                    st.code(text)
 
 
