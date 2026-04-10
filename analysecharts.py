@@ -58,7 +58,7 @@ def findanswers(file_text, question):
     chunked_text_vectors = st.session_state.embeddings
 
     if not chunked_text_vectors:
-        return "Please upload a file"
+        return "Please upload a file", []
 
     #question = fd.getquestion()
     question_embedding = embed_question(question)
@@ -70,18 +70,32 @@ def findanswers(file_text, question):
         scores.append((similarity, chunked_text_vector["text"]))
 
     scores.sort(key = lambda x:x[0], reverse=True)
-
-    context = "\n\n".join(x[1] for x in scores[:10])
-
+    top_chunks = scores[:5]
+    context = "\n\n".join(f"""Source {i+1} : score:{score:.4f}\n{text}""" for i, (score, text) in enumerate(top_chunks))
     response = client.responses.create(
         model = llm_model,
-        input = f""" Answer the question using only the context below.
-                Use strong reasoning to complete the answers and use astrological reasoning to answer the questions but answers must be grounded in context.
-                Context:
-                {context}
-    
-                 Question:
-                {question}"""
-    )
-    print(context)
-    return response.output_text, scores[:10]
+    input=f"""You are answering questions about an uploaded document.
+    Use the retrieved context as the basis for your answer.
+    You should reason carefully, combine relevant parts, and explain the answer clearly in your own words.
+
+    Rules:
+    - Do not make up facts not supported by the retrieved context.
+    - You may draw reasonable inferences if they are strongly supported by the context.
+    - If the answer is partially supported, say what is supported and what is uncertain.
+    - If the answer is not in the context, say that clearly.
+
+    Return:
+    1. A direct answer
+    2. Why this answer follows from the retrieved context
+    3. What is uncertain or missing, if anything
+    4. The most relevant sources
+
+    Retrieved context:
+    {context}
+
+    Question:
+    {question}
+    """
+)
+    # print(context)
+    return response.output_text, top_chunks
