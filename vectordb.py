@@ -15,15 +15,27 @@ client = OpenAI()
 #create/load a Chroma client
 chroma_client = chromadb.PersistentClient(path = "vectordb")
 
+def get_embeddings(text):
+    response = client.embeddings.create(
+        input = text,
+        model = os.getenv("OPENAI_EMBEDDED_MODEL"),
+    )
+    return [e.embedding for e in response.data]
+
 #create/get a collection
-try:
-    vector_collection = chroma_client.get_collection(name = "astro_collection")
-except:
-    vector_collection = chroma_client.create_collection(name="astro_collection", 
-                                embedding_function= OpenAIEmbeddingFunction(
-                                    api_key=os.getenv("OPENAI_API_KEY"), #switch off in local copy
-                                    model_name=os.getenv("OPENAI_EMBEDDED_MODEL")
-                                ))
+def astrocollection():
+    try:
+        return chroma_client.get_collection(name = "astro_collection")
+    except:
+        return chroma_client.create_collection(name = "astro_collection")
+# try:
+#     vector_collection = chroma_client.get_collection(name = "astro_collection")
+# except:
+#     vector_collection = chroma_client.create_collection(name="astro_collection", 
+#                                 embedding_function= OpenAIEmbeddingFunction(
+#                                     api_key=os.getenv("OPENAI_API_KEY"), #switch off in local copy
+#                                     model_name=os.getenv("OPENAI_EMBEDDED_MODEL")
+#                                    ))
 
 #add chunks to the collection
 
@@ -33,7 +45,7 @@ def findanswers(text, question):
     documents = []
     metadatas = []
     ids = []
-
+    vector_collection = astrocollection()
     
     for i, document in enumerate(utils.chunk_text_with_overlap(text)):
         documents.append(document)
@@ -50,13 +62,14 @@ def findanswers(text, question):
     if file_hash not in st.session_state.added_files:  
         vector_collection.upsert(
             ids = ids,
+            embeddings = get_embeddings(documents),
             metadatas= metadatas,
             documents = documents
         )    
         st.session_state.added_files.add(file_hash)
     
     results = vector_collection.query(
-        query_texts=[question],
+        query_embeddings=get_embeddings([question]),
         n_results=5,
         where={"file_hash": file_hash}
     )
