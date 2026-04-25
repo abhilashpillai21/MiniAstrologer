@@ -21,7 +21,8 @@ try:
 except:
     vector_collection = chroma_client.create_collection(name="astro_collection", 
                                 embedding_function= OpenAIEmbeddingFunction(
-                                    model_name=os.getenv("OPENAI_EMBEDDING_MODEL")
+                                    api_key=os.getenv("OPENAI_API_KEY"), #switch off in local copy
+                                    model_name=os.getenv("OPENAI_EMBEDDED_MODEL")
                                 ))
 
 #add chunks to the collection
@@ -90,7 +91,7 @@ def findanswers(text, question):
 
     response = client.responses.create(
         input=input,
-        model =os.getenv("OPENAI_MODEL"),
+        model =os.getenv("OPENAI_API_MODEL"),
     )
 
     return response.output_text, top_chunks

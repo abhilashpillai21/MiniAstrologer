@@ -6,8 +6,8 @@ import utils
 import streamlit as st
 
 load_dotenv()
-embedding_model = os.getenv("OPENAI_EMBEDDING_MODEL")
-llm_model=os.getenv("OPENAI_MODEL")
+embedding_model = os.getenv("OPENAI_EMBEDDED_MODEL")
+llm_model=os.getenv("OPENAI_API_MODEL")
 
 client = OpenAI()
 

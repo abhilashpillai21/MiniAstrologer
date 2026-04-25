@@ -3,7 +3,8 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
+vectordb/
+*.sqlite3
 # Virtual environment
 venv/
 .venv
