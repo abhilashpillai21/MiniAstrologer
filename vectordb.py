@@ -37,7 +37,7 @@ def findanswers(text, question):
     
     for i, document in enumerate(utils.chunk_text_with_overlap(text)):
         documents.append(document)
-        metadatas.append({"source" : st.session_state.last_file,
+        metadatas.append({"source" : str(st.session_state.last_file),
                           "file_hash": str(file_hash)})
         ids.append(f"{file_hash}_{i}")
 
