@@ -10,7 +10,7 @@ from openai import OpenAI
 import hashlib
 
 load_dotenv()
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI()
 
 #create/load a Chroma client
 chroma_client = chromadb.PersistentClient(path = "vectordb")
