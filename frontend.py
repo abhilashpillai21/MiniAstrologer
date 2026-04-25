@@ -1,14 +1,19 @@
 import streamlit as st
 import random
 import time
-import analysecharts
+import vectordb
+#import analysecharts
 
 def getuploadfile():
     if uploaded_file is not None:
         uploaded_file.seek(0)
         return uploaded_file.read().decode("utf-8")  
     return None
- 
+
+def getuploadedfilename():
+    if uploaded_file is not None:
+        return uploaded_file.name 
+    return None
 
 def getquestion():
     return st.session_state.messages[-1]["content"] if "messages" in st.session_state else ""
@@ -37,14 +42,19 @@ if prompt:= st.chat_input("Ask your question"):
     with st.chat_message("assistant"):
         message_placeholder = st.empty()
         file_text = getuploadfile()
-        full_response, sources = analysecharts.findanswers(file_text, prompt)
+        #full_response, sources = analysecharts.findanswers(file_text, prompt)
+        if file_text is None:
+            full_response="Please add a file first"
+            sources = []    
+        else:    
+            full_response, sources = vectordb.findanswers(file_text, prompt)
         st.session_state.messages.append({"role":"assistant", "content":full_response})
         message_placeholder.markdown(full_response)    
 
         with st.sidebar:    
             with st.expander("Sources used"):
                 for score, text in sources: 
-                    st.markdown(f"**Score : ** {score:4f}")
+                    st.markdown(f"**Score : ** {score:.4f}")
                     st.code(text)
 
 

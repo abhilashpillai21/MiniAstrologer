@@ -22,3 +22,7 @@ dist/
 build/
 output.txt
 complete_astrology_data_corrected.txt
+
+#csv
+csv/
+test data/

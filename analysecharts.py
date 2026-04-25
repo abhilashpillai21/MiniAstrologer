@@ -2,6 +2,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 import os
 import math
+import utils
 import streamlit as st
 
 load_dotenv()
@@ -18,18 +19,18 @@ def cosine_similarity(vec1, vec2):
     return dot/(norm1 * norm2) if norm1 and norm2 else 0.0
 
 #chunk text with overlap
-def chunk_text_with_overlap(text, size=500, overlap=100):
-    chunk_text=[]
-    for i in range(0, len(text), size-overlap):
-        chunk_text.append(text[i:i+size])
-    return chunk_text
+# def chunk_text_with_overlap(text, size=500, overlap=100):
+#     chunk_text=[]
+#     for i in range(0, len(text), size-overlap):
+#         chunk_text.append(text[i:i+size])
+#     return chunk_text
 
 #chunk the input text and embed vectors
 def embedfiletext(text):
     #text = fd.getuploadedfiletext()
     if not text:
         return []
-    chunk_text=chunk_text_with_overlap(text)
+    chunk_text=utils.chunk_text_with_overlap(text)
     chunked_text_vectors = []
     for chunk in chunk_text:
         chunk_text_embeddings = client.embeddings.create(
