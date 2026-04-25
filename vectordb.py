@@ -21,7 +21,7 @@ try:
 except:
     vector_collection = chroma_client.create_collection(name="astro_collection", 
                                 embedding_function= OpenAIEmbeddingFunction(
-                                    api_key=os.getenv("OPENAI_API_MODEL"), #switch off in local copy
+                                    api_key=os.getenv("OPENAI_API_KEY"), #switch off in local copy
                                     model_name=os.getenv("OPENAI_EMBEDDED_MODEL")
                                 ))
 
