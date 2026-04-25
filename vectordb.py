@@ -36,14 +36,16 @@ def findanswers(text, question):
     
     for i, document in enumerate(utils.chunk_text_with_overlap(text)):
         documents.append(document)
-        metadatas.append({"source" : st.session_state.last_file})
+        metadatas.append({"source" : st.session_state.last_file,
+                          "file_hash": file_hash})
         ids.append(f"{file_hash}_{i}")
 
     if "added_files" not in st.session_state:
         st.session_state.added_files = set()    
     
     if file_hash not in st.session_state.added_files:  
-        vector_collection.add(
+
+        vector_collection.upsert(
             ids = ids,
             metadatas= metadatas,
             documents = documents
@@ -52,12 +54,13 @@ def findanswers(text, question):
     
     results = vector_collection.query(
         query_texts=[question],
-        n_results=5
+        n_results=5,
+        where={"file_hash": file_hash}
     )
 
     top_chunks = list(zip(results["distances"][0], results["documents"][0]))
 
-    context = "\n\n".join(f"""Source {i+1} : score:{score:.4f}\n{text}""" for i, (score, text) in enumerate(top_chunks))
+    context = "\n\n".join(f"""Source {i+1} : score:{distance:.4f}\n{text}""" for i, (distance, text) in enumerate(top_chunks))
 
     input=f"""You are answering questions about an uploaded document.
     Use the retrieved context as the basis for your answer.
@@ -68,12 +71,15 @@ def findanswers(text, question):
     - You may draw reasonable inferences if they are strongly supported by the context.
     - If the answer is partially supported, say what is supported and what is uncertain.
     - If the answer is not in the context, say that clearly.
+    - You can use Jaimini, Parashari, Varahi intrepretation but strictly use the data in the retrieved content without adding anything from outside.
+    - The retrieved content may not explicity state certain inferences which can be made by studying the birthcharts. 
+    - You must use astrological reasoning to infer that from the retrieved content. 
+    - If content doesnt have the data required to make the inference, state so.
 
-    Return:
-    1. A direct answer
-    2. Why this answer follows from the retrieved context
-    3. What is uncertain or missing, if anything
-    4. The most relevant sources
+    Return without any headings:
+    1. A direct answer. Answer should be complete not generic
+    2. If anything is uncertain or missing, then state so
+    3. Methodology and data used
 
     Retrieved context:
     {context}

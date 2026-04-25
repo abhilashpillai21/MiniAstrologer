@@ -20,7 +20,7 @@ def getquestion():
 
 st.title(":rainbow[Mini Astrology App]")
 
-uploaded_file = st.file_uploader("Upload your birthcharts as txt", type="txt", key="main_file_uploader")
+uploaded_file = st.file_uploader("Upload your birthchart in txt format (markdown)", type="txt", key="main_file_uploader")
 
 if uploaded_file is not None:
     if "last_file" not in st.session_state or st.session_state.last_file!=uploaded_file.name:
@@ -53,8 +53,8 @@ if prompt:= st.chat_input("Ask your question"):
 
         with st.sidebar:    
             with st.expander("Sources used"):
-                for score, text in sources: 
-                    st.markdown(f"**Score : ** {score:.4f}")
+                for i, (distance, text) in enumerate(sources): 
+                    st.markdown(f"**Source {i+1}**")
                     st.code(text)
 
 
