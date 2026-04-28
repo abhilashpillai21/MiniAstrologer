@@ -2,6 +2,7 @@ import streamlit as st
 import random
 import time
 import vectordb
+from auth import supabase
 #import analysecharts
 
 def getuploadfile():
@@ -18,43 +19,80 @@ def getuploadedfilename():
 def getquestion():
     return st.session_state.messages[-1]["content"] if "messages" in st.session_state else ""
 
+if "user" not in st.session_state:
+    st.session_state.user = None
+
 st.title(":rainbow[Mini Astrology App]")
 
-uploaded_file = st.file_uploader("Upload your birthchart in txt format (markdown)", type="txt", key="main_file_uploader")
+if st.session_state.user is None:
+    mode = st.radio("Choose", ["Login", "Sign Up"])
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
+    
+    if st.button(mode):
+        if mode == "Sign Up":
+            response = supabase.auth.sign_up(
+                {
+                    "email": email,
+                    "password":password
+                }
+            )
+            
+        else:
+            response = supabase.auth.sign_in_with_password(
+                {
+                    "email": email,
+                    "password":password
+                }
+            )
 
-if uploaded_file is not None:
-    if "last_file" not in st.session_state or st.session_state.last_file!=uploaded_file.name:
-        st.session_state.embeddings = None
-        st.session_state.last_file = uploaded_file.name
+        st.session_state.user = response.user
+        st.success("Logged in")
+        st.rerun()
+else:
+    st.write(f"Logged in as {st.session_state.user.email}")
+    if st.button("Log out"):
+        st.session_state.user=None
+        st.rerun()            
 
-if "messages" not in st.session_state:
-    st.session_state.messages = [{"role":"assistant", "content":"Ask your question"}]
+if st.session_state.user:
+    uploaded_file = st.file_uploader("Upload your birthchart in txt format (markdown)", type="txt", key="main_file_uploader")
 
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    if uploaded_file is not None:
+        if "last_file" not in st.session_state or st.session_state.last_file!=uploaded_file.name:
+            st.session_state.embeddings = None
+            st.session_state.last_file = uploaded_file.name
 
-if prompt:= st.chat_input("Ask your question"):
-    st.session_state.messages.append({"role":"user", "content":prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    if "messages" not in st.session_state:
+        st.session_state.messages = [{"role":"assistant", "content":"Ask your question"}]
 
-    with st.chat_message("assistant"):
-        message_placeholder = st.empty()
-        file_text = getuploadfile()
-        #full_response, sources = analysecharts.findanswers(file_text, prompt)
-        if file_text is None:
-            full_response="Please add a file first"
-            sources = []    
-        else:    
-            full_response, sources = vectordb.findanswers(file_text, prompt)
-        st.session_state.messages.append({"role":"assistant", "content":full_response})
-        message_placeholder.markdown(full_response)    
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-        with st.sidebar:    
-            with st.expander("Sources used"):
-                for i, (distance, text) in enumerate(sources): 
-                    st.markdown(f"**Source {i+1}**")
-                    st.code(text)
+    if prompt:= st.chat_input("Ask your question"):
+        st.session_state.messages.append({"role":"user", "content":prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            file_text = getuploadfile()
+            #full_response, sources = analysecharts.findanswers(file_text, prompt)
+            if file_text is None:
+                full_response="Please add a file first"
+                sources = []    
+            else:    
+                full_response, sources = vectordb.findanswers(file_text, prompt)
+            st.session_state.messages.append({"role":"assistant", "content":full_response})
+            message_placeholder.markdown(full_response)    
+
+            with st.sidebar:    
+                with st.expander("Sources used"):
+                    for i, (distance, text) in enumerate(sources): 
+                        st.markdown(f"**Source {i+1}**")
+                        st.code(text)
+else:
+    st.warning("Please log in to use the app")                        
 
 
