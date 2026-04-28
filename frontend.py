@@ -47,12 +47,14 @@ if st.session_state.user is None:
                         "password":password
                     }
                 )
-
-            st.session_state.user = response.user
-            st.success("Logged in")
-            st.rerun()
-        except:
-            st.error("Login failed")    
+            if response.user:
+                st.session_state.user = response.user
+                st.success("Logged in")
+                st.rerun()
+            else:    
+                st.error("Login failed")  
+        except Exception as e:
+            st.error(f"Auth error: {str(e)}")          
 else:
     st.write(f"Logged in as {st.session_state.user.email}")
     if st.button("Log out"):
