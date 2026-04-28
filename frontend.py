@@ -30,25 +30,29 @@ if st.session_state.user is None:
     password = st.text_input("Password", type="password")
     
     if st.button(mode):
-        if mode == "Sign Up":
-            response = supabase.auth.sign_up(
-                {
-                    "email": email,
-                    "password":password
-                }
-            )
-            
-        else:
-            response = supabase.auth.sign_in_with_password(
-                {
-                    "email": email,
-                    "password":password
-                }
-            )
+        try:
+            if mode == "Sign Up":
+                response = supabase.auth.sign_up(
+                    {
+                        "email": email,
+                        "password":password
+                    }
+                )
+                st.success("Account created. Please check your email to confirm.")
+                
+            else:
+                response = supabase.auth.sign_in_with_password(
+                    {
+                        "email": email,
+                        "password":password
+                    }
+                )
 
-        st.session_state.user = response.user
-        st.success("Logged in")
-        st.rerun()
+            st.session_state.user = response.user
+            st.success("Logged in")
+            st.rerun()
+        except:
+            st.error("Login failed")    
 else:
     st.write(f"Logged in as {st.session_state.user.email}")
     if st.button("Log out"):
