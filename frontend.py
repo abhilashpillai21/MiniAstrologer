@@ -3,6 +3,10 @@ import vectordb
 from auth import supabase
 
 
+def get_usage_logs():
+    response = supabase.table("usage_logs").select("user_email, question, created_at").execute
+    return response.data
+
 def getuploadfile(uploaded_file):
     if uploaded_file is not None:
         uploaded_file.seek(0)
@@ -160,6 +164,18 @@ if prompt := st.chat_input("Ask your question"):
         })
 
         message_placeholder.markdown(full_response)
+
+        try:
+            supabase.table("usage_logs").insert(
+                {
+                    "user_email": st.session_state.user.email,
+                    "question": prompt,
+                    "answer": full_response
+                }
+            ).execute()
+
+        except Exception as e:
+            st.write(f'Could not save usagelogs : {e}')
 
         if sources:
             with st.sidebar:
