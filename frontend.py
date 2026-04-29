@@ -1,104 +1,169 @@
 import streamlit as st
-import random
-import time
 import vectordb
 from auth import supabase
-#import analysecharts
 
-def getuploadfile():
+
+def getuploadfile(uploaded_file):
     if uploaded_file is not None:
         uploaded_file.seek(0)
-        return uploaded_file.read().decode("utf-8")  
+        return uploaded_file.read().decode("utf-8")
     return None
 
-def getuploadedfilename():
-    if uploaded_file is not None:
-        return uploaded_file.name 
-    return None
 
-def getquestion():
-    return st.session_state.messages[-1]["content"] if "messages" in st.session_state else ""
+def login_user(email, password):
+    response = supabase.auth.sign_in_with_password({
+        "email": email,
+        "password": password
+    })
+    return response
+
+
+def signup_user(email, password):
+    response = supabase.auth.sign_up({
+        "email": email,
+        "password": password
+    })
+    return response
+
+
+# -----------------------------
+# Session state setup
+# -----------------------------
 
 if "user" not in st.session_state:
     st.session_state.user = None
 
+if "messages" not in st.session_state:
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Ask your question"}
+    ]
+
+if "last_file" not in st.session_state:
+    st.session_state.last_file = None
+
+
+# -----------------------------
+# Page title
+# -----------------------------
+
 st.title(":rainbow[Mini Astrology App]")
 
+
+# -----------------------------
+# Auth UI
+# -----------------------------
+
 if st.session_state.user is None:
+    st.subheader("Login or create an account")
+
     mode = st.radio("Choose", ["Login", "Sign Up"])
+
     email = st.text_input("Email")
     password = st.text_input("Password", type="password")
-    
+
     if st.button(mode):
-        try:
-            if mode == "Sign Up":
-                response = supabase.auth.sign_up(
-                    {
-                        "email": email,
-                        "password":password
-                    }
-                )
-                st.success("Account created. Please check your email to confirm.")
-                
-            else:
-                response = supabase.auth.sign_in_with_password(
-                    {
-                        "email": email,
-                        "password":password
-                    }
-                )
-            if response.user:
-                st.session_state.user = response.user
-                st.success("Logged in")
-                st.rerun()
-            else:    
-                st.error("Login failed")  
-        except Exception as e:
-            st.error(f"Auth error: {str(e)}")          
-else:
-    st.write(f"Logged in as {st.session_state.user.email}")
-    if st.button("Log out"):
-        st.session_state.user=None
-        st.rerun()            
+        if not email or not password:
+            st.error("Please enter both email and password.")
+        else:
+            try:
+                if mode == "Sign Up":
+                    signup_user(email, password)
+                    st.success("Account created. Please check your email to confirm your account.")
+                    st.info("After confirming your email, come back and log in.")
 
-if st.session_state.user:
-    uploaded_file = st.file_uploader("Upload your birthchart in txt format (markdown)", type="txt", key="main_file_uploader")
+                else:
+                    response = login_user(email, password)
 
-    if uploaded_file is not None:
-        if "last_file" not in st.session_state or st.session_state.last_file!=uploaded_file.name:
-            st.session_state.embeddings = None
-            st.session_state.last_file = uploaded_file.name
+                    if response.user:
+                        st.session_state.user = response.user
+                        st.success("Logged in successfully.")
+                        st.rerun()
+                    else:
+                        st.error("Login failed.")
 
-    if "messages" not in st.session_state:
-        st.session_state.messages = [{"role":"assistant", "content":"Ask your question"}]
+            except Exception as e:
+                st.error(f"Auth error: {str(e)}")
 
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    st.warning("Please log in to use the app.")
+    st.stop()
 
-    if prompt:= st.chat_input("Ask your question"):
-        st.session_state.messages.append({"role":"user", "content":prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
 
-        with st.chat_message("assistant"):
-            message_placeholder = st.empty()
-            file_text = getuploadfile()
-            #full_response, sources = analysecharts.findanswers(file_text, prompt)
-            if file_text is None:
-                full_response="Please add a file first"
-                sources = []    
-            else:    
-                full_response, sources = vectordb.findanswers(file_text, prompt)
-            st.session_state.messages.append({"role":"assistant", "content":full_response})
-            message_placeholder.markdown(full_response)    
+# -----------------------------
+# Logged-in user area
+# -----------------------------
 
-            with st.sidebar:    
+st.sidebar.write(f"Logged in as: {st.session_state.user.email}")
+
+if st.sidebar.button("Log out"):
+    st.session_state.user = None
+    st.session_state.messages = [
+        {"role": "assistant", "content": "Ask your question"}
+    ]
+    st.session_state.last_file = None
+    st.rerun()
+
+
+# -----------------------------
+# File upload
+# -----------------------------
+
+uploaded_file = st.file_uploader(
+    "Upload your birth chart in txt format",
+    type="txt",
+    key="main_file_uploader"
+)
+
+if uploaded_file is not None:
+    if st.session_state.last_file != uploaded_file.name:
+        st.session_state.last_file = uploaded_file.name
+        st.session_state.messages = [
+            {"role": "assistant", "content": "File uploaded. Ask your question."}
+        ]
+
+
+# -----------------------------
+# Chat history display
+# -----------------------------
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+
+# -----------------------------
+# Chat input
+# -----------------------------
+
+if prompt := st.chat_input("Ask your question"):
+    st.session_state.messages.append({
+        "role": "user",
+        "content": prompt
+    })
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+
+        file_text = getuploadfile(uploaded_file)
+
+        if file_text is None:
+            full_response = "Please upload a birth chart text file first."
+            sources = []
+        else:
+            full_response, sources = vectordb.findanswers(file_text, prompt)
+
+        st.session_state.messages.append({
+            "role": "assistant",
+            "content": full_response
+        })
+
+        message_placeholder.markdown(full_response)
+
+        if sources:
+            with st.sidebar:
                 with st.expander("Sources used"):
-                    for i, (distance, text) in enumerate(sources): 
-                        st.markdown(f"**Source {i+1}**")
+                    for i, (distance, text) in enumerate(sources):
+                        st.markdown(f"**Source {i + 1} | Score: {distance:.4f}**")
                         st.code(text)
-else:
-    st.warning("Please log in to use the app")                        
-
-
