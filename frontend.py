@@ -1,34 +1,15 @@
 import streamlit as st
 import vectordb
 import auth
-#from dashboard import show_dashboard
+from dashboard import render_dashboard
 
-
-# def get_usage_logs():
-#     response = supabase.table("usage_logs").select("user_email, question, created_at").execute
-#     return response.data
+ADMIN_EMAILS = ["abhilashpillai21@gmail.com"]
 
 def getuploadfile(uploaded_file):
     if uploaded_file is not None:
         uploaded_file.seek(0)
         return uploaded_file.read().decode("utf-8")
     return None
-
-
-# def login_user(email, password):
-#     response = supabase.auth.sign_in_with_password({
-#         "email": email,
-#         "password": password
-#     })
-#     return response
-
-
-# def signup_user(email, password):
-#     response = auth.sign_up({
-#         "email": email,
-#         "password": password
-#     })
-#     return response
 
 
 # -----------------------------
@@ -107,6 +88,20 @@ if st.sidebar.button("Log out"):
     st.session_state.last_file = None
     st.rerun()
 
+# -----------------------------
+# Show dashboard to admin_user
+# -----------------------------
+
+is_admin = st.session_state.user.email in ADMIN_EMAILS
+
+if is_admin:
+    page = st.sidebar.radio("Admin", ["App", "Dashboard"])
+else:
+    page = "App"
+
+if page == "Dashboard":
+    render_dashboard(auth.supabase)
+    st.stop()
 
 # -----------------------------
 # File upload
@@ -178,3 +173,5 @@ if prompt := st.chat_input("Ask your question"):
                     for i, (distance, text) in enumerate(sources):
                         st.markdown(f"**Source {i + 1} | Score: {distance:.4f}**")
                         st.code(text)
+
+                    

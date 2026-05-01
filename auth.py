@@ -6,10 +6,6 @@ supabase = create_client(
     os.getenv("SUPABASE_KEY")
 )
 
-def get_usage_logs():
-    response = supabase.table("usage_logs").select("user_email, question, created_at").execute
-    return response.data
-
 def login_user(email, password):
     response = supabase.auth.sign_in_with_password({
         "email": email,
