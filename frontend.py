@@ -3,7 +3,7 @@ import vectordb
 import auth
 from dashboard import render_dashboard
 
-ADMIN_EMAILS = ["abhilashpillai21@gmail.com"]
+ADMIN_EMAILS = ["abhilashpillai2022@gmail.com"]
 
 def getuploadfile(uploaded_file):
     if uploaded_file is not None:
