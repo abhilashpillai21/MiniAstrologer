@@ -23,12 +23,12 @@ def getuploadfile(uploaded_file):
 #     return response
 
 
-def signup_user(email, password):
-    response = auth.auth.sign_up({
-        "email": email,
-        "password": password
-    })
-    return response
+# def signup_user(email, password):
+#     response = auth.sign_up({
+#         "email": email,
+#         "password": password
+#     })
+#     return response
 
 
 # -----------------------------
@@ -72,7 +72,7 @@ if st.session_state.user is None:
         else:
             try:
                 if mode == "Sign Up":
-                    signup_user(email, password)
+                    auth.signup_user(email, password)
                     st.success("Account created. Please check your email to confirm your account.")
                     st.info("After confirming your email, come back and log in.")
 
