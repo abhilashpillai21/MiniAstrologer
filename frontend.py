@@ -1,11 +1,12 @@
 import streamlit as st
 import vectordb
-from auth import supabase
+import auth
+from dashboard import show_dashboard
 
 
-def get_usage_logs():
-    response = supabase.table("usage_logs").select("user_email, question, created_at").execute
-    return response.data
+# def get_usage_logs():
+#     response = supabase.table("usage_logs").select("user_email, question, created_at").execute
+#     return response.data
 
 def getuploadfile(uploaded_file):
     if uploaded_file is not None:
@@ -14,16 +15,16 @@ def getuploadfile(uploaded_file):
     return None
 
 
-def login_user(email, password):
-    response = supabase.auth.sign_in_with_password({
-        "email": email,
-        "password": password
-    })
-    return response
+# def login_user(email, password):
+#     response = supabase.auth.sign_in_with_password({
+#         "email": email,
+#         "password": password
+#     })
+#     return response
 
 
 def signup_user(email, password):
-    response = supabase.auth.sign_up({
+    response = auth.auth.sign_up({
         "email": email,
         "password": password
     })
@@ -76,7 +77,7 @@ if st.session_state.user is None:
                     st.info("After confirming your email, come back and log in.")
 
                 else:
-                    response = login_user(email, password)
+                    response = auth.login_user(email, password)
 
                     if response.user:
                         st.session_state.user = response.user
@@ -166,13 +167,7 @@ if prompt := st.chat_input("Ask your question"):
         message_placeholder.markdown(full_response)
 
         try:
-            supabase.table("usage_logs").insert(
-                {
-                    "user_email": st.session_state.user.email,
-                    "question": prompt,
-                    "answer": full_response
-                }
-            ).execute()
+            auth.insert_data(st.session_state.user.email, prompt, full_response)
 
         except Exception as e:
             st.write(f'Could not save usagelogs : {e}')

@@ -5,3 +5,31 @@ supabase = create_client(
     os.getenv("SUPABASE_URL"),
     os.getenv("SUPABASE_KEY")
 )
+
+def get_usage_logs():
+    response = supabase.table("usage_logs").select("user_email, question, created_at").execute
+    return response.data
+
+def login_user(email, password):
+    response = supabase.auth.sign_in_with_password({
+        "email": email,
+        "password": password
+    })
+    return response
+
+
+def signup_user(email, password):
+    response = supabase.auth.sign_up({
+        "email": email,
+        "password": password
+    })
+    return response
+
+def insert_data(email, prompt, full_response):
+    supabase.table("usage_logs").insert(
+    {
+        "user_email": email,
+        "question": prompt,
+        "answer": full_response
+    }).execute()
+    
