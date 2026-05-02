@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 
 def get_usage_logs(supabase):
-    response = supabase.table("usage_logs").select("user_email, question, created_at").execute
+    response = supabase.table("usage_logs").select("user_email, question, created_at").execute()
     return response.data
 
 def render_dashboard(supabase):
