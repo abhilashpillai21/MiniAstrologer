@@ -3,6 +3,11 @@ import streamlit as st
 
 def get_usage_logs(supabase):
     response = supabase.table("usage_logs").select("user_email, question, created_at").execute()
+    st.write("Running NEW dashboard code")
+
+    if response.data is None:
+        return []
+    
     return response.data
 
 def render_dashboard(supabase):
