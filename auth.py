@@ -32,7 +32,7 @@ def insert_data(email, prompt, full_response):
 def get_questions(email, limit=10):
     response = supabase.table("usage_logs"). \
     select("question, answer, created_at"). \
-    eq("user_email",email).order(desc=True). \
+    eq("user_email",email).order("created_at", desc=True). \
     limit(limit).execute()
-    
+
     return response.data
