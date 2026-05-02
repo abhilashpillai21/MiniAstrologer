@@ -11,6 +11,7 @@ def get_usage_logs(supabase):
     return response.data
 
 def render_dashboard(supabase):
+    st.write("🔥 DASHBOARD VERSION V2 LOADED")
     st.title("Admin Dashboard")
 
     data = get_usage_logs(supabase)
