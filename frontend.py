@@ -104,6 +104,27 @@ if page == "Dashboard":
     st.stop()
 
 # -----------------------------
+# Show history of questions
+# -----------------------------
+
+st.sidebar.subheader("Recent questions")
+
+try:
+    recent_questions  = auth.get_questions(st.session_state.user.email)
+    
+    if recent_questions:
+        for row in recent_questions:
+            with st.sidebar.expander(row["question"]):
+                st.write(row["answer"])
+                st.caption(row["created_at"])
+    else:
+        st.sidebar.write("No questions yet.")            
+
+        
+except Exception as e:
+    st.sidebar.error(f"Could not load history: {e}")
+
+# -----------------------------
 # File upload
 # -----------------------------
 
