@@ -2,7 +2,7 @@ import streamlit as st
 import vectordb
 import os
 from dashboard import render_dashboard
-
+import auth
 
 
 ADMIN_EMAILS = [os.getenv("SUPABASE_URL")]
