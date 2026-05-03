@@ -5,7 +5,7 @@ from dashboard import render_dashboard
 import auth
 
 
-ADMIN_EMAILS = [os.getenv("SUPABASE_URL")]
+ADMIN_EMAILS = [os.getenv("ADMIN_EMAILS")]
 
 def getuploadfile(uploaded_file):
     if uploaded_file is not None:
