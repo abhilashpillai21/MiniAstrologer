@@ -1,9 +1,11 @@
 import streamlit as st
 import vectordb
-import auth
+import os
 from dashboard import render_dashboard
 
-ADMIN_EMAILS = ["abhilashpillai2022@gmail.com"]
+
+
+ADMIN_EMAILS = [os.getenv("SUPABASE_URL")]
 
 def getuploadfile(uploaded_file):
     if uploaded_file is not None:

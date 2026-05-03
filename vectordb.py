@@ -100,11 +100,12 @@ def findanswers(text, question, history_text):
     Retrieved context:
     {context}
 
+    Use previous conversation ONLY if relevant to the current question. Previous conversation:
+    {history_text}
+    
     Question:
     {question}
 
-    Use this conversation for context if relevant.
-    {history_text}
     """
 
     response = client.responses.create(
