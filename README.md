@@ -19,6 +19,8 @@ The long-term goal is to turn this into a helpful assistant for people who want 
 
 ## Features
 
+The app currently includes the following core features needed for a simple authenticated RAG-based chat experience:
+
 - Email/password login and signup using Supabase Auth
 - Upload a `.txt` birth chart file
 - Ask questions about the uploaded chart
@@ -30,6 +32,8 @@ The long-term goal is to turn this into a helpful assistant for people who want 
 
 ## Tech Stack
 
+This project uses following lightweight Python-based stack that is beginner-friendly while still covering real AI app concepts:
+
 - Python
 - Streamlit
 - OpenAI API
@@ -38,6 +42,8 @@ The long-term goal is to turn this into a helpful assistant for people who want 
 - Pandas
 
 ## How It Works
+
+At a high level, the app follows the following basic RAG workflow from file upload to grounded answer generation:
 
 1. A user logs in or creates an account.
 2. The user uploads a birth chart text file.
@@ -49,6 +55,8 @@ The long-term goal is to turn this into a helpful assistant for people who want 
 8. The answer is shown in the chat UI and saved to Supabase.
 
 ## Project Structure
+
+The codebase is intentionally small and organized around the main parts of the app: UI, authentication, retrieval, analytics, and helpers.
 
 ```text
 MiniAstrologer/
@@ -102,6 +110,8 @@ Then open the local Streamlit URL shown in the terminal.
 
 ## Current Limitations
 
+Since this is a learning project, there are still several areas that need improvement before it becomes a more polished product.
+
 - Only `.txt` uploads are supported.
 - Admin email is currently hard-coded in `frontend.py`.
 - There are no automated tests yet.
@@ -111,7 +121,8 @@ Then open the local Streamlit URL shown in the terminal.
 
 ## Improvement Roadmap
 
-- Add `.env.example`
+The next improvements are focused on making the app easier to use, easier to maintain, and more useful as an AI product.
+
 - Move admin email configuration to an environment variable
 - Add PDF upload support
 - Add feedback buttons for answers, such as helpful or not helpful
