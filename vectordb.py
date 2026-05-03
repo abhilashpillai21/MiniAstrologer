@@ -39,14 +39,14 @@ def astrocollection():
 
 #add chunks to the collection
 
-def findanswers(text, question):
+def findanswers(text, question, history_text):
 
     file_hash =  hashlib.md5(text.encode()).hexdigest()
     documents = []
     metadatas = []
     ids = []
     vector_collection = astrocollection()
-    
+            
     for i, document in enumerate(utils.chunk_text_with_overlap(text)):
         documents.append(document)
         metadatas.append({"source" : str(st.session_state.last_file),
@@ -102,6 +102,9 @@ def findanswers(text, question):
 
     Question:
     {question}
+
+    Use this conversation for context if relevant.
+    {history_text}
     """
 
     response = client.responses.create(

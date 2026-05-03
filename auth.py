@@ -36,3 +36,12 @@ def get_questions(email, limit=10):
     limit(limit).execute()
 
     return response.data
+
+def get_recent_history(email, limit=3):
+    response = supabase.table("usage_logs").\
+    select("question, answer").\
+    eq("user_email", email).\
+    order("created_at", desc=True).\
+    limit(limit).execute()
+
+    return response.data or []   

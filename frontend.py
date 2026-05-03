@@ -173,7 +173,15 @@ if prompt := st.chat_input("Ask your question"):
             full_response = "Please upload a birth chart text file first."
             sources = []
         else:
-            full_response, sources = vectordb.findanswers(file_text, prompt)
+            history = auth.get_recent_history(st.session_state.user.email)
+            history_text = "Previous conversation:\n"
+            for item in reversed(history):
+                history_text += f"""
+User: {item["question"]}
+Assistant: {item["answer"]}
+"""
+
+            full_response, sources = vectordb.findanswers(file_text, prompt, history_text)
 
         st.session_state.messages.append({
             "role": "assistant",
