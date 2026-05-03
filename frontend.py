@@ -5,7 +5,6 @@ from dashboard import render_dashboard
 import auth
 
 ADMIN_EMAILS = [os.getenv("ADMIN_EMAILS")]
-st.write(f"{ADMIN_EMAILS} is admin")
 
 def getuploadfile(uploaded_file):
     if uploaded_file is not None:
